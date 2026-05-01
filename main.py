@@ -8,21 +8,45 @@ width = 900
 height = 700
 
 
+class Sprite:
+    def __init__(self, img):
+        self.sprite = pygame.image.load(img)
+        self.sprite.convert()
+        self.rect = self.sprite.get_rect()
+        self.screen_rect = Rect((0,0), (width, height))
 
-class Barry:
-    def __init__(self) -> None:
-        #Create dog sprite (Surface object of image to display.)
-        self.dog = pygame.image.load("Demo_Dog.png")
-        self.dog.convert() #Optimises image format and makes drawing faster.
-        #Returns rect object from an image.
-        self.rect = self.dog.get_rect()
+    def draw(self, surface):
+        surface.blit(self.sprite, self.rect)
+
+
+class Barry(Sprite):
+    def __init__(self, img):
+        super().__init__(img)
 
     def update(self, vector):
         self.rect.move_ip(vector)
         #Add checking for collisions with screen borders
+        self.rect.clamp_ip(self.screen_rect)
 
-    def draw(self, surface):
-        surface.blit(self.dog, self.rect)
+
+class Owner(Sprite):
+    def __init__(self, img):
+        super().__init__(img)        
+        self.speed = [1,1]
+
+    def update(self):
+        self.rect.move_ip(self.speed)
+        #Add checking for collisions with screen borders
+        if self.rect.left < self.screen_rect.left:
+            self.speed[0] = abs(self.speed[0])
+        if self.rect.right > self.screen_rect.right:
+            self.speed[0] = -abs(self.speed[0])
+
+        if self.rect.top < self.screen_rect.top:
+            self.speed[1] = abs(self.speed[1])
+        if self.rect.bottom > self.screen_rect.bottom:
+            self.speed[1] = -abs(self.speed[1])
+
 
 class Game():
     def __init__(self):
@@ -36,11 +60,13 @@ class Game():
                           K_RIGHT: (5,0),
                           K_UP: (0,-5),
                           K_DOWN: (0,5)}
+        
 
     def run(self):
-        
         while self.running:
             self.screen.fill(color=YELLOW)
+            if pygame.time.get_ticks() % 75 == 0:
+                self.owner.update()
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.running = False
@@ -60,20 +86,16 @@ class Game():
 
     def draw(self):
         self.barry.draw(self.screen)
+        self.owner.draw(self.screen)
         pygame.display.flip()
-        
 
-                
-                #Check sprite within borders
-                # if rect.left < 0 or rect.right > WIDTH:
-                #     pass
-                # if rect.top < 0 or rect.bottom > HEIGHT:
-                #     pass
 
 if __name__ == "__main__":
     game = Game()
-    barry = Barry()
+    barry = Barry("Demo_Dog.png")
+    owner = Owner("Demo_Owner.png")
     game.add_barry(barry)
+    game.add_owner(owner)
     game.run()
 
 
