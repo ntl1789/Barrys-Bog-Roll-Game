@@ -22,6 +22,8 @@ class Sprite:
 class Barry(Sprite):
     def __init__(self, img):
         super().__init__(img)
+        self.rect.center = 50,650
+        self.moving = False
 
     def update(self, vector):
         self.rect.move_ip(vector)
@@ -56,10 +58,10 @@ class Game():
         self.running = True
         self.barry = None
         self.owner = None
-        self.movements = {K_LEFT: (-5,0),
-                          K_RIGHT: (5,0),
-                          K_UP: (0,-5),
-                          K_DOWN: (0,5)}
+        self.movements = {K_LEFT: (-1,0),
+                          K_RIGHT: (1,0),
+                          K_UP: (0,-1),
+                          K_DOWN: (0,1)}
         
 
     def run(self):
@@ -67,13 +69,34 @@ class Game():
             self.screen.fill(color=YELLOW)
             if pygame.time.get_ticks() % 75 == 0:
                 self.owner.update()
+
             for event in pygame.event.get():
+                print(event)
                 if event.type == QUIT:
                     self.running = False
+
                 if event.type == KEYDOWN:
-                    if event.key in self.movements:
-                        vector = self.movements[event.key]
-                        self.barry.update(vector)
+                    barry.moving = True
+                
+                if event.type == KEYUP:
+                    barry.moving = False
+
+            if barry.moving:
+                if event.key in self.movements:
+                        self.barry.update(self.movements[event.key])
+
+              
+                    
+
+                
+                            
+
+            if pygame.sprite.collide_rect(self.barry, self.owner):
+                font = pygame.font.SysFont(None, 20)
+                img = font.render("Game Over", True, RED)
+                self.screen.blit(img, (450,350))
+                pygame.time.delay(100)
+                pygame.quit()
             self.draw()
             
         pygame.quit()
